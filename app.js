@@ -1,5 +1,5 @@
 // === CONFIGURATION ===
-const API_URL = "https://script.google.com/macros/s/AKfycbyW7UZrsAE7r635CWKnEKSNdy7FVb1nkyl9bJjJZIKqATQYXHIsqJoj4VY3Q9gUEsMOMw/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbyD4gR2QFJ8o97NDiqzZkfdY2u7egqVNO0dqF3JdkUBh7xWuTij95GT-dW0ndEc3obJEg/exec"; 
 
 // State
 let products = [];
@@ -29,10 +29,10 @@ function switchTab(tab) {
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     
     document.getElementById(tab + '-view').classList.add('active');
-    // Highlight button logic here if you added IDs to buttons, simpler:
     event.target.classList.add('active');
     
     if(tab === 'pos') renderPOS();
+    if(tab === 'reports') loadSales();
 }
 
 // === API INTERACTIONS ===
