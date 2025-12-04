@@ -52,6 +52,9 @@ function doPost(e) {
    - Execute as: **Me**
 5. Click **Deploy** and copy the **Web App URL**.
 
+https://shopdb.netlify.app/
+https://docs.google.com/spreadsheets/d/1EYKQ8_2ba50WDIUEBKJYrbwrDa9OLaKIRB0leZ072fw/edit?gid=0#gid=0
+
 ### 3. Connect Frontend
 1. Open `index.html`.
 2. Replace `YOUR_WEB_APP_URL_HERE` with your Web App URL.
