@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Manager Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* ... Existing Styles ... */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; transition: background 0.3s, color 0.3s; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        
+        /* Navigation */
+        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .nav-btn { background: transparent; color: var(--text-muted); border: none; font-size: 1.1rem; cursor: pointer; padding: 0.5rem 1rem; font-weight: 600; width: auto; }
+        .nav-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        
+        /* Hide/Show Views */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* POS Styles */
+        .pos-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+        .product-card { background: var(--card-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+        .product-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .product-card h4 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .product-price { font-weight: 800; color: var(--primary); }
+        .stock-badge { font-size: 0.75rem; color: var(--text-muted); }
+
+        .cart-panel { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; height: fit-content; position: sticky; top: 2rem; }
+        .cart-items { margin: 1rem 0; max-height: 400px; overflow-y: auto; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .cart-total { font-size: 1.5rem; font-weight: 800; margin: 1rem 0; text-align: right; }
+        
+        /* Standard Components */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        h1 { font-size: 2rem; font-weight: 800; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-card { display: flex; flex-direction: column; gap: 0.5rem; }
+        .stat-label { color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+        .content-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; }
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--card-bg); color: var(--text); }
+        .flex { display: flex; gap: 1rem; }
+        button { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
+        button:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); width: auto; padding: 0.5rem 1rem; }
+        .btn-edit { background: var(--warning); width: auto; padding: 0.5rem 1rem; margin-right: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border); }
+        th { background: var(--bg); color: var(--text-muted); }
+        .low-stock { color: var(--danger); font-weight: 600; }
+        .theme-toggle { background: transparent; border: 1px solid var(--border); padding: 0.5rem; width: auto; color: var(--text); }
+        
+        @media (max-width: 768px) { .content-grid, .pos-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shop Manager</h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab('inventory')">Inventory Management</button>
+            <button class="nav-btn" onclick="switchTab('pos')">Point of Sale (POS)</button>
+        </nav>
+
+        <!-- === VIEW 1: INVENTORY === -->
+        <div id="inventory-view" class="view-section active">
+            <!-- Stats -->
+            <div class="dashboard-grid">
+                <div class="card stat-card">
+                    <span class="stat-label">Total Value</span>
+                    <span class="stat-value" id="total-value">$0.00</span>
+                </div>
+                <div class="card stat-card">
+                    <span class="stat-label">Low Stock</span>
+                    <span class="stat-value" style="color: var(--danger);" id="low-stock-count">0</span>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <!-- Add Form -->
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Add / Edit Item</h2>
+                    <form id="add-form">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="category">
+                                <option value="Electronics">Electronics</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Food">Food</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="flex">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Qty</label>
+                                <input type="number" id="qty" required min="0">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Price</label>
+                                <input type="number" id="price" required min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Low Stock Alert</label>
+                            <input type="number" id="low-stock-threshold" value="5">
+                        </div>
+                        <button type="submit" id="submit-btn">Add Product</button>
+                    </form>
+                </div>
+
+                <!-- Table -->
+                <div class="card">
+                    <div class="flex" style="justify-content: space-between; margin-bottom: 1rem;">
+                        <h2>Inventory</h2>
+                        <input type="text" id="search" placeholder="Search..." style="width: 200px;">
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Category</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === VIEW 2: POINT OF SALE === -->
+        <div id="pos-view" class="view-section">
+            <div class="pos-layout">
+                <!-- Product Grid -->
+                <div>
+                    <input type="text" id="pos-search" placeholder="Search products to sell..." style="margin-bottom: 1rem;">
+                    <div class="product-grid" id="pos-grid">
+                        <!-- Products injected here -->
+                    </div>
+                </div>
+
+                <!-- Cart -->
+                <div class="cart-panel">
+                    <h2>Current Sale</h2>
+                    <div class="cart-items" id="cart-items">
+                        <div style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Cart is empty</div>
+                    </div>
+                    <div class="cart-total">Total: <span id="cart-total-amount">$0.00</span></div>
+                    <button onclick="checkout()" id="checkout-btn">Complete Sale</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
