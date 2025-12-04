@@ -107,24 +107,57 @@ async function checkout() {
     if (cart.length === 0) return alert("Cart is empty!");
     if (!confirm("Complete sale?")) return;
 
+    // 1. Calculate Totals for Invoice
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const tax = subtotal * 0.16; // 16% Tax
+    const total = subtotal + tax;
+    const saleId = "INV-" + Date.now().toString().slice(-6); // Short ID
+
     setLoading(true);
     try {
-        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        
+        // 2. Send to Backend
         await fetch(API_URL, { 
             method: "POST", 
             body: JSON.stringify({ action: "checkout", cart: cart, total: total }) 
         });
         
+        // 3. Print Invoice
+        printInvoice(cart, subtotal, tax, total, saleId);
+        
+        // 4. Reset
         cart = [];
         renderCart();
-        await loadProducts(); // Refresh inventory
-        alert("Sale Completed!");
+        await loadProducts(); 
+        
     } catch (error) {
+        console.error(error);
         alert("Checkout failed.");
     } finally {
         setLoading(false);
     }
+}
+
+function printInvoice(cartItems, subtotal, tax, total, saleId) {
+    // Populate HTML
+    document.getElementById('receipt-date').textContent = new Date().toLocaleString();
+    document.getElementById('receipt-id').textContent = `Invoice #: ${saleId}`;
+    
+    const tbody = document.getElementById('receipt-body');
+    tbody.innerHTML = cartItems.map(item => `
+        <tr>
+            <td>${item.qty}</td>
+            <td>${item.name}</td>
+            <td class="right">${item.price.toFixed(2)}</td>
+            <td class="right">${(item.price * item.qty).toFixed(2)}</td>
+        </tr>
+    `).join('');
+    
+    document.getElementById('receipt-subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('receipt-tax').textContent = tax.toFixed(2);
+    document.getElementById('receipt-total').textContent = "Rs. " + total.toFixed(2);
+
+    // Trigger Print
+    window.print();
 }
 
 // === CART LOGIC ===
