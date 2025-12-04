@@ -35,6 +35,66 @@ function switchTab(tab) {
     if(tab === 'reports') loadSales();
 }
 
+// === REPORTS ===
+async function loadSales() {
+    setLoading(true);
+    try {
+        const res = await fetch(API_URL + "?type=sales");
+        const data = await res.json();
+        renderSales(Array.isArray(data) ? data : []);
+    } catch (error) {
+        console.error("Error loading sales:", error);
+        alert("Failed to load sales history.");
+    } finally {
+        setLoading(false);
+    }
+}
+
+function renderSales(sales) {
+    const tbody = document.getElementById('sales-list');
+    let totalRevenue = 0;
+
+    // Safety Check: Did we get Inventory data by mistake? (Old Script Version)
+    if (sales.length > 0 && !sales[0].items && sales[0].name) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center; padding: 2rem;">❌ <b>Error: API returned Inventory data.</b><br>You must go to Apps Script > Deploy > <b>New Version</b> to fix this.</td></tr>';
+        return;
+    }
+
+    if (sales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No sales history found.</td></tr>';
+        document.getElementById('report-total-revenue').textContent = '$0.00';
+        document.getElementById('report-count').textContent = '0';
+        return;
+    }
+
+    tbody.innerHTML = sales.map(s => {
+        // Ensure total is a number
+        const saleTotal = Number(s.total) || 0;
+        totalRevenue += saleTotal;
+        
+        let itemsText = "";
+        try {
+             // Parse JSON items, or handle if it's already an object
+             const items = typeof s.items === 'string' ? JSON.parse(s.items) : s.items;
+             if (Array.isArray(items)) {
+                itemsText = items.map(i => `${i.qty}x ${i.name}`).join(', ');
+             }
+        } catch (e) { itemsText = "Error parsing items"; }
+
+        return `
+            <tr>
+                <td>${s.date ? new Date(s.date).toLocaleString() : 'Invalid Date'}</td>
+                <td>${s.id}</td>
+                <td>${itemsText}</td>
+                <td>$${saleTotal.toFixed(2)}</td>
+            </tr>
+        `;
+    }).join('');
+
+    document.getElementById('report-total-revenue').textContent = '$' + totalRevenue.toFixed(2);
+    document.getElementById('report-count').textContent = sales.length;
+}
+
 // === API INTERACTIONS ===
 async function loadProducts() {
     setLoading(true);

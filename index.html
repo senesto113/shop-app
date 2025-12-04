@@ -132,7 +132,7 @@
 
         <!-- NAVIGATION -->
         <nav class="nav-tabs">
-            <button class="nav-btn active" onclick="switchTab('inventory')">Inventory 2 Management</button>
+            <button class="nav-btn active" onclick="switchTab('inventory')">Inventory Management</button>
             <button class="nav-btn" onclick="switchTab('pos')">Point of Sale (POS)</button>
             <button class="nav-btn" onclick="switchTab('reports')">Sales Reports</button>
         </nav>
@@ -230,6 +230,41 @@
                     </div>
                     <div class="cart-total">Total: <span id="cart-total-amount">$0.00</span></div>
                     <button onclick="checkout()" id="checkout-btn">Complete Sale</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- === VIEW 3: SALES REPORTS === -->
+        <div id="reports-view" class="view-section">
+            <!-- Stats -->
+            <div class="dashboard-grid">
+                <div class="card stat-card">
+                    <span class="stat-label">Total Revenue</span>
+                    <span class="stat-value" style="color: var(--success);" id="report-total-revenue">$0.00</span>
+                </div>
+                <div class="card stat-card">
+                    <span class="stat-label">Total Sales</span>
+                    <span class="stat-value" id="report-count">0</span>
+                </div>
+            </div>
+
+            <!-- Sales History Table -->
+            <div class="card">
+                <h2 style="margin-bottom: 1.5rem;">Sales History</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Invoice #</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-list">
+                            <tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading sales data...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
